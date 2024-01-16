@@ -14,7 +14,7 @@ import {
   HapticModeEnum,
   PanDirectionEnum,
   Slider,
-} from '@danieldunderfelt/react-native-awesome-slider';
+} from '@hus/react-native-awesome-slider';
 
 import Animated, {
   useAnimatedProps,
