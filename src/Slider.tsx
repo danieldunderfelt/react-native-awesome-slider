@@ -215,6 +215,7 @@ export type AwesomeSliderProps = {
   snapToStep?: boolean;
   alwaysShowBubble?: boolean;
   bubbleStyle?: StyleProp<ViewStyle>;
+  fractionalValue?: boolean;
 };
 const defaultTheme: SliderThemeType = {
   minimumTrackTintColor: palette.Main,
@@ -237,6 +238,7 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
   disable = false,
   disableTapEvent = false,
   disableTrackFollow = false,
+  fractionalValue = false,
   hapticMode = 'none',
   isScrubbing,
   markStyle,
@@ -290,7 +292,7 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
   const [sliderWidth, setSliderWidth] = useState(0);
   const width = useSharedValue(0);
   const thumbValue = useSharedValue(0);
-  const bubbleOpacity = useSharedValue(0);
+  const bubbleOpacity = useSharedValue(alwaysShowBubble ? 1 : 0);
   const markLeftArr = useSharedValue<number[]>([]);
   const isTriggedHaptic = useSharedValue(false);
   const _theme = {
@@ -440,8 +442,10 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
    */
   const shareValueToSeconds = useCallback(() => {
     'worklet';
+    let sliderValue;
+
     if (snappingEnabled) {
-      return clamp(
+      sliderValue = clamp(
         minimumValue.value +
           (thumbIndex.value / step) * (maximumValue.value - minimumValue.value),
         minimumValue.value,
@@ -453,11 +457,21 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
         0,
         1,
       );
-      return (
+
+      sliderValue =
         minimumValue.value +
-        clamp(sliderPercent * sliderTotalValue.value, 0, sliderTotalValue.value)
-      );
+        clamp(
+          sliderPercent * sliderTotalValue.value,
+          0,
+          sliderTotalValue.value,
+        );
     }
+
+    if (fractionalValue) {
+      return sliderValue;
+    }
+
+    return Math.round(sliderValue);
   }, [
     maximumValue.value,
     minimumValue.value,
@@ -468,6 +482,7 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
     thumbWidth,
     width.value,
     snappingEnabled,
+    fractionalValue,
   ]);
   /**
    * convert [x] position to progress
@@ -479,10 +494,15 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
       if (snappingEnabled && markLeftArr.value.length >= step) {
         return markLeftArr.value[thumbIndex.value];
       } else {
-        return (
+        const sliderValue =
           minimumValue.value +
-          (x / (width.value - thumbWidth)) * sliderTotalValue.value
-        );
+          (x / (width.value - thumbWidth)) * sliderTotalValue.value;
+
+        if (fractionalValue) {
+          return sliderValue;
+        }
+
+        return Math.round(sliderValue);
       }
     },
     [
@@ -494,6 +514,7 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
       width.value,
       minimumValue.value,
       snappingEnabled,
+      fractionalValue,
     ],
   );
 
