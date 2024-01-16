@@ -13,8 +13,8 @@
 ## Get Start
 
 ```sh
-git clone https://github.com/alantoa/react-native-awesome-slider.git
-cd react-native-awesome-slider
+git clone https://github.com/alantoa/@danieldunderfelt/react-native-awesome-slider.git
+cd @danieldunderfelt/react-native-awesome-slider
 yarn bootstrap
 ```
 

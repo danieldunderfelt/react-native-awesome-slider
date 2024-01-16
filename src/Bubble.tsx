@@ -1,11 +1,10 @@
-import React, { forwardRef, useImperativeHandle, useRef, memo } from 'react';
+import React, { forwardRef, memo, useImperativeHandle, useRef } from 'react';
 import {
   StyleProp,
+  StyleSheet,
   TextInput,
   TextStyle,
-  View,
   ViewStyle,
-  StyleSheet,
 } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { palette } from './theme/palette';
@@ -26,6 +25,8 @@ export type BubbleProps = {
    * the style for the container view
    */
   containerStyle?: StyleProp<ViewStyle>;
+
+  bubbleStyle?: StyleProp<ViewStyle>;
 
   /**
    * the style for the TextInput inside bubble
@@ -48,8 +49,9 @@ export const BubbleComponent = forwardRef<BubbleRef, BubbleProps>(
       textStyle,
       textColor = palette.White,
       bubbleMaxWidth,
+      bubbleStyle,
     },
-    ref
+    ref,
   ) => {
     const textRef = useRef<TextInput>(null);
 
@@ -58,15 +60,18 @@ export const BubbleComponent = forwardRef<BubbleRef, BubbleProps>(
         textRef.current?.setNativeProps({ text });
       },
     }));
+
     return (
       <Animated.View style={[styles.view, containerStyle]}>
         <Animated.View
-          style={{
-            ...BUBBLE_STYLE,
-            backgroundColor: color,
-            maxWidth: bubbleMaxWidth,
-          }}
-        >
+          style={[
+            BUBBLE_STYLE,
+            {
+              backgroundColor: color,
+              maxWidth: bubbleMaxWidth,
+            },
+            bubbleStyle,
+          ]}>
           <TextInput
             ref={textRef}
             textAlign="center"
@@ -75,28 +80,12 @@ export const BubbleComponent = forwardRef<BubbleRef, BubbleProps>(
             caretHidden
           />
         </Animated.View>
-        <View
-          style={[
-            styles.triangle,
-            {
-              borderTopColor: color,
-            },
-          ]}
-        />
       </Animated.View>
     );
-  }
+  },
 );
 export const Bubble = memo(BubbleComponent);
 const styles = StyleSheet.create({
-  triangle: {
-    width: 10,
-    height: 10,
-    borderWidth: 5,
-    borderColor: 'transparent',
-    backgroundColor: 'transparent',
-    flexDirection: 'row',
-  },
   textStyle: {
     fontSize: 12,
     paddingVertical: 0,

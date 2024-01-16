@@ -1,4 +1,12 @@
-import React, { FC, useRef, useState, useMemo, memo, useCallback } from 'react';
+import React, {
+  FC,
+  useRef,
+  useState,
+  useMemo,
+  memo,
+  useCallback,
+  useEffect,
+} from 'react';
 import {
   Insets,
   LayoutChangeEvent,
@@ -19,7 +27,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import type { WithTimingConfig } from 'react-native-reanimated';
-import { Bubble, BubbleRef } from './ballon';
+import { Bubble, BubbleRef } from './Bubble';
 import { palette } from './theme/palette';
 import { clamp } from './utils';
 const formatSeconds = (second: number) => `${Math.round(second * 100) / 100}`;
@@ -205,6 +213,8 @@ export type AwesomeSliderProps = {
   bubbleWidth?: number;
   testID?: string;
   snapToStep?: boolean;
+  alwaysShowBubble?: boolean;
+  bubbleStyle?: StyleProp<ViewStyle>;
 };
 const defaultTheme: SliderThemeType = {
   minimumTrackTintColor: palette.Main,
@@ -214,11 +224,13 @@ const defaultTheme: SliderThemeType = {
   bubbleTextColor: palette.White,
 };
 export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
+  alwaysShowBubble = true,
   bubble,
   bubbleContainerStyle,
   bubbleMaxWidth = 100,
   bubbleTextStyle,
   bubbleTranslateY = -25,
+  bubbleStyle,
   bubbleWidth = 0,
   cache,
   containerStyle,
@@ -264,7 +276,7 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
     const index = Math.round(
       ((progress.value - minimumValue.value) /
         (maximumValue.value - minimumValue.value)) *
-        step
+        step,
     );
     return clamp(index, 0, step);
   }, [
@@ -285,6 +297,12 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
     ...defaultTheme,
     ...theme,
   };
+
+  useEffect(() => {
+    if (alwaysShowBubble) {
+      bubbleOpacity.value = withSpring(1);
+    }
+  }, [alwaysShowBubble, bubbleOpacity]);
 
   const sliderTotalValue = useDerivedValue(() => {
     'worklet';
@@ -331,13 +349,13 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
       translateX = clamp(
         thumbValue.value,
         0,
-        width.value ? width.value - thumbWidth : 0
+        width.value ? width.value - thumbWidth : 0,
       );
     } else {
       translateX = clamp(
         progressToValue(progress.value),
         0,
-        width.value ? width.value - thumbWidth : 0
+        width.value ? width.value - thumbWidth : 0,
       );
     }
     sliderTotalValue.value; // hack: force recompute styles when 'sliderTotalValue' change
@@ -376,14 +394,14 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
                   clamp(
                     translateX,
                     bubbleWidth / 2,
-                    width.value - bubbleWidth / 2
+                    width.value - bubbleWidth / 2,
                   ),
-                  stepTimingOptions
+                  stepTimingOptions,
                 )
               : clamp(
                   translateX,
                   bubbleWidth / 2,
-                  width.value - bubbleWidth / 2
+                  width.value - bubbleWidth / 2,
                 ),
         },
         {
@@ -394,16 +412,17 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
   });
 
   const animatedCacheXStyle = useAnimatedStyle(() => {
-    const cacheX = cache?.value && sliderTotalValue.value
-      ? (cache?.value / sliderTotalValue.value) * width.value
-      : 0;
+    const cacheX =
+      cache?.value && sliderTotalValue.value
+        ? (cache?.value / sliderTotalValue.value) * width.value
+        : 0;
 
     return {
       width: cacheX,
     };
   });
 
-  const onSlideAcitve = useCallback(
+  const onSlideActive = useCallback(
     (seconds: number) => {
       const bubbleText = bubble ? bubble?.(seconds) : formatSeconds(seconds);
       onValueChange?.(seconds);
@@ -412,7 +431,7 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
         ? setBubbleText(bubbleText)
         : bubbleRef.current?.setText(bubbleText);
     },
-    [bubble, onValueChange, setBubbleText]
+    [bubble, onValueChange, setBubbleText],
   );
 
   /**
@@ -426,13 +445,13 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
         minimumValue.value +
           (thumbIndex.value / step) * (maximumValue.value - minimumValue.value),
         minimumValue.value,
-        maximumValue.value
+        maximumValue.value,
       );
     } else {
       const sliderPercent = clamp(
         thumbValue.value / (width.value - thumbWidth),
         0,
-        1
+        1,
       );
       return (
         minimumValue.value +
@@ -475,7 +494,7 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
       width.value,
       minimumValue.value,
       snappingEnabled,
-    ]
+    ],
   );
 
   /**
@@ -489,7 +508,7 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
         isScrubbing.value = true;
       }
       if (snappingEnabled) {
-        const index = markLeftArr.value.findIndex((item) => item >= x);
+        const index = markLeftArr.value.findIndex(item => item >= x);
         const arrNext = markLeftArr.value[index];
         const arrPrev = markLeftArr.value[index - 1];
         // Computing step boundaries
@@ -518,7 +537,7 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
           isTriggedHaptic.value = false;
         }
 
-        runOnJS(onSlideAcitve)(shareValueToSeconds());
+        runOnJS(onSlideActive)(shareValueToSeconds());
       } else {
         thumbValue.value = clamp(x, 0, width.value - thumbWidth);
         if (!disableTrackFollow) {
@@ -537,7 +556,7 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
         } else {
           isTriggedHaptic.value = false;
         }
-        runOnJS(onSlideAcitve)(shareValueToSeconds());
+        runOnJS(onSlideActive)(shareValueToSeconds());
       }
     },
     [
@@ -548,7 +567,7 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
       isTriggedHaptic,
       markLeftArr.value,
       onHapticFeedback,
-      onSlideAcitve,
+      onSlideActive,
       progress,
       shareValueToSeconds,
       step,
@@ -558,7 +577,7 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
       width.value,
       xToProgress,
       snappingEnabled,
-    ]
+    ],
   );
 
   const onGestureEvent = useMemo(
@@ -609,7 +628,10 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
           if (panDirectionValue) {
             panDirectionValue.value = PanDirectionEnum.END;
           }
-          bubbleOpacity.value = withSpring(0);
+
+          if (!alwaysShowBubble) {
+            bubbleOpacity.value = withSpring(0);
+          }
 
           if (disableTrackFollow) {
             progress.value = xToProgress(x);
@@ -633,7 +655,8 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
       progress,
       shareValueToSeconds,
       xToProgress,
-    ]
+      alwaysShowBubble,
+    ],
   );
   const onSingleTapEvent = useMemo(
     () =>
@@ -669,12 +692,12 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
       onTap,
       panHitSlop,
       shareValueToSeconds,
-    ]
+    ],
   );
 
   const gesture = useMemo(
     () => Gesture.Race(onSingleTapEvent, onGestureEvent),
-    [onGestureEvent, onSingleTapEvent]
+    [onGestureEvent, onSingleTapEvent],
   );
 
   // setting markLeftArr
@@ -691,11 +714,11 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
       }
       return [];
     },
-    (data) => {
+    data => {
       markLeftArr.value = data;
       // thumbIndex.value = ;
     },
-    [thumbWidth, markWidth, step, progress, width]
+    [thumbWidth, markWidth, step, progress, width],
   );
 
   // setting thumbValue
@@ -712,12 +735,12 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
         (width.value - (disableTrackFollow ? thumbWidth : 0));
       return clamp(currentValue, 0, width.value - thumbWidth);
     },
-    (data) => {
+    data => {
       if (data !== undefined) {
         thumbValue.value = data;
       }
     },
-    [thumbWidth, maximumValue, minimumValue, step, progress, width]
+    [thumbWidth, maximumValue, minimumValue, step, progress, width],
   );
   const onLayout = ({ nativeEvent }: LayoutChangeEvent) => {
     const layoutWidth = nativeEvent.layout.width;
@@ -731,8 +754,7 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
         testID={testID}
         style={[styles.view, { height: sliderHeight }, style]}
         hitSlop={panHitSlop}
-        onLayout={onLayout}
-      >
+        onLayout={onLayout}>
         <Animated.View
           style={StyleSheet.flatten([
             styles.slider,
@@ -741,8 +763,7 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
               backgroundColor: _theme.maximumTrackTintColor,
             },
             containerStyle,
-          ])}
-        >
+          ])}>
           <Animated.View
             style={[
               styles.cache,
@@ -776,8 +797,7 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
                       left,
                       width: markWidth,
                     },
-                  ]}
-                >
+                  ]}>
                   {renderMark({ index: i })}
                 </View>
               ) : (
@@ -819,8 +839,7 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
               width: bubbleMaxWidth,
             },
             animatedBubbleStyle,
-          ]}
-        >
+          ]}>
           {renderBubble ? (
             renderBubble()
           ) : (
@@ -831,6 +850,7 @@ export const Slider: FC<AwesomeSliderProps> = memo(function Slider({
               textStyle={bubbleTextStyle}
               containerStyle={bubbleContainerStyle}
               bubbleMaxWidth={bubbleMaxWidth}
+              bubbleStyle={bubbleStyle}
             />
           )}
         </Animated.View>
