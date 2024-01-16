@@ -34,13 +34,13 @@ const TITLE: TextStyle = {
 export default function App() {
   const [disable, setDisable] = useState(false);
 
-  const progress1 = useSharedValue(30);
-  const progress3 = useSharedValue(30);
-  const progress5 = useSharedValue(30);
-  const progress6 = useSharedValue(30);
-  const progress7 = useSharedValue(20);
-  const progress8 = useSharedValue(40);
-  const progress9 = useSharedValue(30);
+  const value1 = useSharedValue(30);
+  const value3 = useSharedValue(30);
+  const value5 = useSharedValue(30);
+  const value6 = useSharedValue(30);
+  const value7 = useSharedValue(20);
+  const value8 = useSharedValue(40);
+  const value9 = useSharedValue(30);
 
   const thumbScaleValue = useSharedValue(1);
   const min = useSharedValue(0);
@@ -92,7 +92,7 @@ export default function App() {
       value = 0.25;
     }
     return {
-      progress: withTiming(value, { duration: 600 }),
+      value: withTiming(value, { duration: 600 }),
     };
   });
   return (
@@ -107,7 +107,7 @@ export default function App() {
               <Text tx="Base" h3 style={TITLE} />
               <Slider
                 style={styles.container}
-                progress={progress1}
+                value={value1}
                 onSlidingComplete={onSlidingComplete}
                 onSlidingStart={onSlidingStart}
                 minimumValue={min}
@@ -158,7 +158,7 @@ export default function App() {
               <Text tx="Light & Dark theme" h3 style={TITLE} />
               <Slider
                 style={styles.container}
-                progress={progress1}
+                value={value1}
                 onSlidingComplete={onSlidingComplete}
                 onSlidingStart={onSlidingStart}
                 minimumValue={min}
@@ -171,7 +171,7 @@ export default function App() {
             <View style={[styles.card]}>
               <Text tx="Custom bubble & thumb" h3 style={TITLE} />
               <Slider
-                progress={progress3}
+                value={value3}
                 style={styles.slider}
                 minimumValue={min}
                 maximumValue={max}
@@ -195,7 +195,7 @@ export default function App() {
             <View style={[styles.card]}>
               <Text tx="Range & Haptic step-mode" h3 style={TITLE} />
               <Slider
-                progress={progress5}
+                value={value5}
                 minimumValue={min10}
                 style={styles.slider}
                 maximumValue={max110}
@@ -215,7 +215,7 @@ export default function App() {
             <View style={[styles.card]}>
               <Text tx="Haptic both-mode" h3 style={TITLE} />
               <Slider
-                progress={progress6}
+                value={value6}
                 style={styles.slider}
                 minimumValue={min10}
                 maximumValue={max110}
@@ -228,7 +228,7 @@ export default function App() {
             <View style={[styles.card]}>
               <Text tx="Lottie thumb" h3 style={TITLE} />
               <Slider
-                progress={progress7}
+                value={value7}
                 style={styles.slider}
                 minimumValue={min10}
                 maximumValue={max110}
@@ -253,7 +253,7 @@ export default function App() {
             <View style={[styles.card]}>
               <Text tx="Disable track follow" h3 style={TITLE} />
               <Slider
-                progress={progress8}
+                value={value8}
                 style={styles.slider}
                 minimumValue={min}
                 theme={{
@@ -299,7 +299,7 @@ export default function App() {
                 style={styles.slider}
                 snapToStep={false}
                 thumbWidth={26}
-                progress={progress9}
+                value={value9}
                 minimumValue={min}
                 maximumValue={max}
                 thumbScaleValue={thumbScaleValue}
@@ -307,7 +307,7 @@ export default function App() {
               <Slider
                 style={styles.container}
                 containerStyle={{ borderRadius: 8 }}
-                progress={progress9}
+                value={value9}
                 minimumValue={min}
                 maximumValue={max}
                 renderBubble={() => null}
